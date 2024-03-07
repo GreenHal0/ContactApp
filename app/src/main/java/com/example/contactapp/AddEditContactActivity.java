@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -136,7 +137,7 @@ public class AddEditContactActivity extends AppCompatActivity {
         });
         builder.setNeutralButton("Pick from galery", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                Intent pickPhoto = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                Intent pickPhoto = new Intent(Intent.ACTION_OPEN_DOCUMENT, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 selectAnAvatar.launch(pickPhoto);
             }
         });
@@ -145,11 +146,14 @@ public class AddEditContactActivity extends AppCompatActivity {
     }
     ActivityResultLauncher<Intent> selectAnAvatar =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+                @SuppressLint("WrongConstant")
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK){
                         Intent intent = result.getData();
                         if (intent != null) {
+                            final int flags = intent.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            getContentResolver().takePersistableUriPermission(intent.getData(), flags);
                             avatarUri = intent.getData();
                             avatarView.setImageURI(avatarUri);
                             avatarButton.setVisibility(View.GONE);
