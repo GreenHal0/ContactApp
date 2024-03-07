@@ -50,8 +50,8 @@ public class AddEditContactActivity extends AppCompatActivity {
         viewMode = intent.getStringExtra("viewMode");
         if (viewMode==null) viewMode = "create";
 
-        name = findViewById(R.id.editText_FirstName);
-        firstName = findViewById(R.id.editText_Name);
+        name = findViewById(R.id.editText_Name);
+        firstName = findViewById(R.id.editText_FirstName);
         phone = findViewById(R.id.editText_Phone);
         email = findViewById(R.id.editText_Email);
         avatarButton = findViewById(R.id.button_Avatar);
@@ -129,12 +129,14 @@ public class AddEditContactActivity extends AppCompatActivity {
     public void onChooseAvatar (View v){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Do you want to take a picture or choose existing one ?").setTitle("Avatar selection");
+        /*
         builder.setPositiveButton("Take picture", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 selectAnAvatar.launch(takePicture);
             }
         });
+        */
         builder.setNeutralButton("Pick from galery", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 Intent pickPhoto = new Intent(Intent.ACTION_OPEN_DOCUMENT, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -172,7 +174,7 @@ public class AddEditContactActivity extends AppCompatActivity {
 
     public void onLeftButtonClick(View v) {
         Intent intent = new Intent();
-        if (viewMode.equals("edit"))
+        if (viewMode.equals("edit") || viewMode.equals("view"))
             contacts.remove(getIntent().getIntExtra("position", 0));
         setResult(RESULT_OK, intent);
         finish();

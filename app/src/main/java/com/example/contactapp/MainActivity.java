@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         listView.setOnItemLongClickListener(this);
         listView.setAdapter(contactAdapter);
 
-        contacts.add(new Contact("Name", "First name", "dezfdsfs", ""));
+        contacts.add(new Contact("Name", "Firstname", "555-3612", "email@example.fr"));
     }
 
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -57,8 +57,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Intent intent = new Intent(this, AddEditContactActivity.class);
         intent.putExtra("viewMode", "view");
         intent.putExtra("position", position);
-        intent.putExtra("contactInfos", contacts.get(position).getAll());
-        intent.putExtra("contactAvatar", (Parcelable) contacts.get(position).getAvatar());
         contactView.launch(intent);
     }
 
