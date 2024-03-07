@@ -58,6 +58,10 @@ public class Contact implements Comparable<Contact>  {
         return avatar;
     }
 
+    public void setAvatar(Uri newAvatar) {
+        avatar = newAvatar;
+    }
+
 
     @Override
     public int compareTo(Contact o) {

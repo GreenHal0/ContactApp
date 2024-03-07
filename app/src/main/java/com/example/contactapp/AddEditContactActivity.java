@@ -2,6 +2,8 @@ package com.example.contactapp;
 
 import static android.app.PendingIntent.getActivity;
 
+import static com.example.contactapp.MainActivity.contacts;
+
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -64,8 +66,8 @@ public class AddEditContactActivity extends AppCompatActivity {
         avatarView.getLayoutParams().height = displayMetrics.heightPixels/5;
 
         if (viewMode.equals("edit") || viewMode.equals("view")) {
-            String[] contactInfos = intent.getStringArrayExtra("contactInfos");
-            Uri contactAvatar = intent.getParcelableExtra("contactAvatar");
+            String[] contactInfos = contacts.get(intent.getIntExtra("position", 0)).getAll();
+            Uri contactAvatar = contacts.get(intent.getIntExtra("position", 0)).getAvatar();
             name.setText(contactInfos[0]);
             firstName.setText(contactInfos[1]);
             phone.setText(contactInfos[2]);
@@ -156,30 +158,44 @@ public class AddEditContactActivity extends AppCompatActivity {
                 }
             });
 
+    /*
+    return true if the necessary fields has been filled
+     */
+    public boolean requiredInformationContact() {
+        return !name.getText().toString().isEmpty() && !phone.getText().toString().isEmpty();
+    }
+
 
     public void onLeftButtonClick(View v) {
         Intent intent = new Intent();
-        intent.putExtra("viewMode", viewMode);
-        intent.putExtra("button", "left");
-        intent.putExtra("position", getIntent().getIntExtra("position", -1));
+        if (viewMode.equals("edit"))
+            contacts.remove(getIntent().getIntExtra("position", 0));
         setResult(RESULT_OK, intent);
         finish();
     }
 
     public void onRightButtonClick(View v) {
         Intent intent = new Intent();
-        intent.putExtra("button", "right");
-        intent.putExtra("viewMode", viewMode);
         if (viewMode.equals("create") || viewMode.equals("edit")){
-            intent.putExtra("viewMode", viewMode);
-            intent.putExtra("position", getIntent().getIntExtra("position", 0));
-
-            String[] infosContact = {name.getText().toString(), firstName.getText().toString(), phone.getText().toString(), email.getText().toString()};
-            // Ajout à l'intent et envoies
-            intent.putExtra("contactInfos", infosContact);
-            intent.putExtra("avatar", avatarUri);
+            if (requiredInformationContact()) {
+                Contact newContact = new Contact(name.getText().toString(), firstName.getText().toString(), phone.getText().toString(), email.getText().toString(), avatarUri);
+                if (avatarUri != null)
+                    newContact.setAvatar(avatarUri);
+                if (viewMode.equals("create"))
+                    contacts.add(newContact);
+                else if (viewMode.equals("edit"))
+                    contacts.set(getIntent().getIntExtra("position", 0), newContact);
+                intent.putExtra("needRefresh", true);
+                setResult(RESULT_OK, intent);
+                finish();
+            }
+            else
+                Toast.makeText(this, "Missing informations to create a contact", Toast.LENGTH_SHORT).show();
         }
-        setResult(RESULT_OK, intent);
-        finish();
+        else if (viewMode.equals("view")) {
+            intent.putExtra("needRefresh", false);
+            setResult(RESULT_OK, intent);
+            finish();
+        }
     }
 }

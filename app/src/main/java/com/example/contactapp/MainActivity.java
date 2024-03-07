@@ -23,7 +23,7 @@ import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
 
-    protected ArrayList<Contact> contacts;
+    protected static ArrayList<Contact> contacts;
     ContactAdapter contactAdapter;
     ListView listView;
     FloatingActionButton addContact;
@@ -76,42 +76,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 String viewMode = intent.getStringExtra("viewMode");
                 if (viewMode==null) viewMode = "create";
 
-                // Si bouton de droite
-                if (result.getResultCode() == RESULT_OK && (viewMode.equals("create")||viewMode.equals("edit")) && intent.getStringExtra("button").equals("right")) {
-                    Log.d("resultActivity", viewMode);
-                    String[] contactInfos = intent.getStringArrayExtra("contactInfos");
-                    // Si au moins nom et numero
-                    if (!contactInfos[0].isEmpty() && !contactInfos[1].isEmpty() && !contactInfos[2].isEmpty()){
-                        // Si en mode create
-                        if (viewMode.equals("create")) {
-                            if (intent.getParcelableExtra("avatar") != null)
-                                contacts.add(new Contact(contactInfos[0], contactInfos[1], contactInfos[2], contactInfos[3], intent.getParcelableExtra("avatar")));
-                            else
-                                contacts.add(new Contact(contactInfos[0], contactInfos[1], contactInfos[2], contactInfos[3]));
-                        }
-                        // Si en mode edit
-                        else if (viewMode.equals("edit")) {
-                            if (intent.getParcelableExtra("avatar") != null)
-                                contacts.set(intent.getIntExtra("position", 0), new Contact(contactInfos[0], contactInfos[1], contactInfos[2], contactInfos[3], intent.getParcelableExtra("avatar")));
-                            else
-                                contacts.set(intent.getIntExtra("position", 0), new Contact(contactInfos[0], contactInfos[1], contactInfos[2], contactInfos[3]));
-                        }
-                        Collections.sort(contacts);
-                        contactAdapter.notifyDataSetChanged();
-                    }
-                    else
-                        Toast.makeText(MainActivity.this, "Missing informations to create a contact", Toast.LENGTH_SHORT).show();
-                }
-
-                // Si boutons de gauche
-                else if (result.getResultCode() == RESULT_OK && intent.getStringExtra("button").equals("left")) {
-                    Log.d("endOfView", "1");
-                    int deletePosition = intent.getIntExtra("position", -1);
-                    if (deletePosition != -1) {
-                        Log.d("endOfView", "2");
-                        contacts.remove(deletePosition);
-                        contactAdapter.notifyDataSetChanged();
-                    }
+                // Refresh data if needed
+                if (result.getResultCode() == RESULT_OK && intent.getBooleanExtra("needRefresh", true)) {
+                    Collections.sort(contacts);
+                    contactAdapter.notifyDataSetChanged();
                 }
             }
         }
