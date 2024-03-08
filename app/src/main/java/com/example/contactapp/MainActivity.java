@@ -1,5 +1,7 @@
 package com.example.contactapp;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -7,9 +9,13 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -18,6 +24,11 @@ import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -47,8 +58,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        contacts.remove(position);
-        contactAdapter.notifyDataSetChanged();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Do you want to remove "+contacts.get(position).getName()+" ?").setTitle("Remove contact");
+        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                contacts.remove(position);
+                contactAdapter.notifyDataSetChanged();
+            }
+        });
+        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {}
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
         return true; // enchaine avec un click court si false
     }
 
@@ -82,6 +104,4 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         }
     });
-
-
 }

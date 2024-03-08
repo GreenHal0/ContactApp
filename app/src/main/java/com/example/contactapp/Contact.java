@@ -1,16 +1,13 @@
 package com.example.contactapp;
 
-import android.net.Uri;
-
-import java.io.Serializable;
-import java.net.URI;
+import android.graphics.Bitmap;
 
 public class Contact implements Comparable<Contact>  {
 
     private static int count=0;
     private int id;
     private String name, firstName, phone, email;
-    Uri avatar;
+    Bitmap avatar;
 
     public Contact(String name, String firstName, String phone, String email) {
         this.name = name;
@@ -21,7 +18,7 @@ public class Contact implements Comparable<Contact>  {
         this.id = ++count;
     }
 
-    public Contact(String name, String firstName, String phone, String email, Uri avatar) {
+    public Contact(String name, String firstName, String phone, String email, Bitmap avatar) {
         this.name = name;
         this.firstName = firstName;
         this.phone = phone;
@@ -54,11 +51,11 @@ public class Contact implements Comparable<Contact>  {
         return new String[]{name, firstName, phone, email};
     }
 
-    public Uri getAvatar() {
+    public Bitmap getAvatar() {
         return avatar;
     }
 
-    public void setAvatar(Uri newAvatar) {
+    public void setAvatar(Bitmap newAvatar) {
         avatar = newAvatar;
     }
 

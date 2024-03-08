@@ -19,6 +19,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -30,12 +32,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.IOException;
+
 public class AddEditContactActivity extends AppCompatActivity {
 
     EditText name, firstName, phone, email;
     Button avatarButton, leftButton, rightButton;
     ImageView avatarView;
-    Uri avatarUri;
+    Bitmap avatarBitmap;
     String viewMode;
 
     private static final int CAMERA_PERMISSION_CODE = 100;
@@ -68,12 +72,15 @@ public class AddEditContactActivity extends AppCompatActivity {
 
         if (viewMode.equals("edit") || viewMode.equals("view")) {
             String[] contactInfos = contacts.get(intent.getIntExtra("position", 0)).getAll();
-            Uri contactAvatar = contacts.get(intent.getIntExtra("position", 0)).getAvatar();
+            Bitmap contactAvatar = contacts.get(intent.getIntExtra("position", 0)).getAvatar();
             name.setText(contactInfos[0]);
             firstName.setText(contactInfos[1]);
             phone.setText(contactInfos[2]);
             email.setText(contactInfos[3]);
-            avatarView.setImageURI(contactAvatar);
+            if (contactAvatar!=null)
+                avatarView.setImageBitmap(contactAvatar);
+            else
+                avatarView.setImageBitmap(BitmapFactory.decodeResource(this.getResources(), R.mipmap.ic_contact_icon));
 
             if (viewMode.equals("view")) {
                 name.setKeyListener(null);
@@ -87,45 +94,6 @@ public class AddEditContactActivity extends AppCompatActivity {
         }
 
     }
-
-    public void checkPermission(String permission, int requestCode)
-    {
-        // Checking if permission is not granted
-        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this, new String[] { permission }, requestCode);
-        }
-        else {
-            Toast.makeText(this, "Permission already granted", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults)
-    {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == CAMERA_PERMISSION_CODE) {
-
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Camera Permission Granted", Toast.LENGTH_SHORT).show();
-            }
-            else {
-                Toast.makeText(this, "Camera Permission Denied", Toast.LENGTH_SHORT).show();
-            }
-        }
-        else if (requestCode == STORAGE_PERMISSION_CODE) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Storage Permission Granted", Toast.LENGTH_SHORT).show();
-            }
-            else {
-                Toast.makeText(this, "Storage Permission Denied", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
     public void onChooseAvatar (View v){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Do you want to take a picture or choose existing one ?").setTitle("Avatar selection");
@@ -135,14 +103,13 @@ public class AddEditContactActivity extends AppCompatActivity {
                 selectAnAvatar.launch(pickPhoto);
             }
         });
-        /*
         builder.setNeutralButton("Take picture", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 selectAnAvatar.launch(takePicture);
             }
         });
-        */
+
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -154,10 +121,12 @@ public class AddEditContactActivity extends AppCompatActivity {
                     if (result.getResultCode() == Activity.RESULT_OK){
                         Intent intent = result.getData();
                         if (intent != null) {
-                            final int flags = intent.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            getContentResolver().takePersistableUriPermission(intent.getData(), flags);
-                            avatarUri = intent.getData();
-                            avatarView.setImageURI(avatarUri);
+                            try {
+                                avatarBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), intent.getData());
+                                avatarView.setImageBitmap(avatarBitmap);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
                             avatarButton.setVisibility(View.GONE);
                         }
                     }
@@ -184,9 +153,9 @@ public class AddEditContactActivity extends AppCompatActivity {
         Intent intent = new Intent();
         if (viewMode.equals("create") || viewMode.equals("edit")){
             if (requiredInformationContact()) {
-                Contact newContact = new Contact(name.getText().toString(), firstName.getText().toString(), phone.getText().toString(), email.getText().toString(), avatarUri);
-                if (avatarUri != null)
-                    newContact.setAvatar(avatarUri);
+                Contact newContact = new Contact(name.getText().toString(), firstName.getText().toString(), phone.getText().toString(), email.getText().toString(), avatarBitmap);
+                if (avatarBitmap != null)
+                    newContact.setAvatar(avatarBitmap);
                 if (viewMode.equals("create"))
                     contacts.add(newContact);
                 else if (viewMode.equals("edit"))
