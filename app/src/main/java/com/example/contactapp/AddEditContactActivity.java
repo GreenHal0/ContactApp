@@ -129,20 +129,20 @@ public class AddEditContactActivity extends AppCompatActivity {
     public void onChooseAvatar (View v){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Do you want to take a picture or choose existing one ?").setTitle("Avatar selection");
+        builder.setPositiveButton("Pick from galery", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Intent pickPhoto = new Intent(Intent.ACTION_OPEN_DOCUMENT, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                selectAnAvatar.launch(pickPhoto);
+            }
+        });
         /*
-        builder.setPositiveButton("Take picture", new DialogInterface.OnClickListener() {
+        builder.setNeutralButton("Take picture", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 selectAnAvatar.launch(takePicture);
             }
         });
         */
-        builder.setNeutralButton("Pick from galery", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                Intent pickPhoto = new Intent(Intent.ACTION_OPEN_DOCUMENT, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                selectAnAvatar.launch(pickPhoto);
-            }
-        });
         AlertDialog dialog = builder.create();
         dialog.show();
     }
